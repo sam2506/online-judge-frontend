@@ -11,6 +11,7 @@ import NavBar from "./component/NavBar/NavBar";
 import Signup from "./component/Signup/Signup";
 import Problems from "./component/Problems/Problems"
 import Problem from "./component/Problem/Problem"
+import NotFound from "./utils/NotFound/NotFound"
 import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "./service/AuthenticationService"
 
 class App extends Component {
@@ -39,6 +40,7 @@ class App extends Component {
               <Login {...props} updateLoggedIn = {() => this.updateLoggedIn()} />
             )} />
             <Route path="/signup" component={Signup}/>
+            <Route component={NotFound} />
           </Switch>
         </div>
       </Router>

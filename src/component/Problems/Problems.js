@@ -2,7 +2,6 @@ import { Component } from "react";
 import 'bootstrap/dist/css/bootstrap.css';
 import { Table } from 'react-bootstrap';
 import axios from 'axios';
-import AuthenticationService from "../../service/AuthenticationService";
 import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
 
 class Problems extends Component {
@@ -25,6 +24,8 @@ class Problems extends Component {
                 problems = res.data;
                 console.log(problems);
                 this.setState({ problems });
+            }).catch((err) => {
+                console.log(err);
             })
     }
 

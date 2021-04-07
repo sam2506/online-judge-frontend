@@ -4,13 +4,27 @@ import { Navbar } from 'react-bootstrap';
 import { Nav } from 'react-bootstrap'; 
 import { NavDropdown } from 'react-bootstrap'; 
 import { Button } from 'react-bootstrap'; 
+import { Spinner } from 'react-bootstrap';
 import AceEditor from 'react-ace'; 
+import axios from 'axios';
+import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
+import { USER_NAME_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
+import NotFound from "../../utils/NotFound/NotFound";
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
 
 class Problem extends Component {
 
     state = {
-        languages: ["C++", "C", "Java", "Python"],
-        currentLanguage: "Select Language"
+        languages: ["CPP", "C", "JAVA", "PYTHON"],
+        currentLanguage: "Select Language",
+        problem: null,
+        code: "",
+        submitted: false,
+        isCompilationSuccessful: false,
+        testCasesResponse: [],
+        verdict: null,
+        noOfTestCases: 0
     }
 
     selectLanguage(e, language) {
@@ -20,72 +34,249 @@ class Problem extends Component {
     showLanguagesInDropdown() {
         var languages = this.state.languages;
         return languages.map((language, index) => 
-            <NavDropdown.Item onClick={((e) => this.selectLanguage(e, language))} eventKey = {index}>{language}</NavDropdown.Item>
+            <NavDropdown.Item key={index} onClick={((e) => this.selectLanguage(e, language))} eventKey = {index}>{language}</NavDropdown.Item>
         )
     }
 
+    updateCode(updatedCode) {
+        this.setState({code: updatedCode});
+    }
+
+    submitCode() {
+        const loggedInUserName = sessionStorage.getItem(USER_NAME_SESSION_ATTRIBUTE_NAME);
+        if (loggedInUserName == null) {
+            this.props.history.push("/login");
+        } else {
+            const currentLanguage = this.state.currentLanguage
+            if(!this.state.languages.includes(currentLanguage)) {
+                alert("Please select any language");
+            } else {
+                let axiosConfig = {
+                    headers: {
+                        'Content-Type': 'application/json;charset=UTF-8',
+                        "Access-Control-Allow-Origin": "*",
+                        "Authorization": sessionStorage.getItem(USER_TOKEN_SESSION_ATTRIBUTE_NAME)
+                    }
+                };
+                const body = {
+                    submissionId: "sub_id_9",
+                    problemId: this.state.problem.problemId,
+                    userName: loggedInUserName,
+                    code: this.state.code,
+                    languageId: currentLanguage
+                }  
+                axios.post("http://localhost:8080/problems/" + this.state.problem.problemId + "/submit", body, axiosConfig)
+                    .then((res) => {
+                        this.setState({verdict: res.data})
+                    }).catch((err) => {
+                        console.log(err);
+                });
+                this.setState({submitted: true})
+            }
+        }
+    }
+
+    showTestCasesResponse() {
+        var testCases = [];
+        var testCasesResponse = this.state.testCasesResponse;
+        for(var i = 0 ; i < this.state.noOfTestCases ; i++) {
+            if(testCasesResponse[i] == undefined) {
+                testCases.push(
+                    <div key={i} className="col-3 mb-4">
+                        <i className="mr-1 fa fa-spinner fa-spin"></i>
+                        Test Case {i}
+                    </div>
+                )
+            }
+            if(testCasesResponse[i] === "WA") {
+                testCases.push(
+                    <div key={i} className="col-3 mb-4">
+                       <i title="Wrong Answer" className="text-danger mr-1 fa fa-times" aria-hidden="true"></i>
+                        Test Case {i}
+                    </div>
+                )
+            }
+            if(testCasesResponse[i] === "AC") {
+                testCases.push(
+                    <div key={i} className="col-3 mb-4">
+                        <i title="Correct Answer" className="text-success mr-1 fa fa-check" aria-hidden="true"></i>
+                        Test Case {i}
+                    </div>
+                )
+            }
+            if(testCasesResponse[i] === "TLE") {
+                testCases.push(
+                    <div key={i} className="col-3 mb-4">
+                        <i title="Time Limit Exceeded" className="text-danger mr-1 fa fa-exclamation-circle" aria-hidden="true"></i>
+                        Test Case {i}
+                    </div>
+                )
+            }
+            if(testCasesResponse[i] === "RE") {
+                testCases.push(
+                    <div key={i} className="col-3 mb-4">
+                        <i title="Runtime Error" className="text-danger mr-1 fa fa-exclamation-circle" aria-hidden="true"></i>
+                        Test Case {i}
+                    </div>
+                )
+            }
+            if(testCasesResponse[i] === "MLE") {
+                testCases.push(
+                    <div key={i} className="col-3 mb-4">
+                        <i title="Memory Limit Exceeded" className="text-danger mr-1 fa fa-exclamation-circle" aria-hidden="true"></i>
+                        Test Case {i}
+                    </div>
+                )
+            }
+        }
+        return testCases;
+    }
+
+    showResult() {
+        if(this.state.verdict == null) {
+            return <span>
+                    <Spinner size="sm" className="ml-2 mr-1" animation="border" role="status">
+                        <span className="sr-only">Loading...</span>
+                    </Spinner>
+                    Evaluating Solution
+                </span>
+            
+        } else {
+            return <span className="ml-1">{this.state.verdict}</span>
+        }
+    }
+
+    fetchProblem() {
+        const problemId = this.props.match.params.id;
+        const token = sessionStorage.getItem(USER_TOKEN_SESSION_ATTRIBUTE_NAME);
+        let axiosConfig = {
+            headers: {
+                "Authorization": token
+            }
+        };
+
+        axios.get("http://localhost:8080/problems/" + problemId, axiosConfig)
+            .then(res => {
+                const problem = res.data;
+                console.log(problem);
+                this.setState({ problem });
+            }).catch((err) => {
+                console.log(err);
+            })
+    }
+
+    setupWebSocket() {
+        const socket = SockJS("http://localhost:8080/chat"); 
+        const stompClient = Stomp.over(socket);
+        var that = this;
+        const userName = sessionStorage.getItem(USER_NAME_SESSION_ATTRIBUTE_NAME);
+        stompClient.connect({}, () => {
+            stompClient.subscribe("/user/" + userName + "/queue/testCaseResponses", function(testCaseResponse) {
+                testCaseResponse = JSON.parse(testCaseResponse.body);
+                var testCaseNo = testCaseResponse["testCaseNo"];
+                var verdict = testCaseResponse["verdict"];
+                var testCasesResponse = that.state.testCasesResponse;
+                testCasesResponse[testCaseNo] = verdict;
+                that.setState({testCasesResponse: testCasesResponse});
+            });
+            stompClient.subscribe("/user/" + userName + "/queue/compilationResponse", function(compilationResponse) {
+                compilationResponse = JSON.parse(compilationResponse.body);
+                var noOfTestCases = compilationResponse["noOfTestCases"];
+                var isCompilationSuccessful = compilationResponse["compilationSuccessful"];
+                that.setState({noOfTestCases: noOfTestCases, isCompilationSuccessful: isCompilationSuccessful});
+            });
+        });   
+    }
+
+    componentDidMount() {
+        this.fetchProblem();
+        this.setupWebSocket();
+    }
+
     render() {
-        console.log(this.props.match.params.id);
+        const submitted = this.state.submitted;
+        const isCompilationSuccessful = this.state.isCompilationSuccessful;
+        const problem = this.state.problem;
+        const constraintList = [];
+        if(problem != null) {
+            const constraints = problem.constraints;
+            constraints.map((constraint, index) => 
+               constraintList.push(<li key={index}>{constraint}</li>)
+            )
+        }
         return (
-            <div className="col-10 offset-1"> 
-                <br></br>
-               <h1>Problem Name</h1>
-               <h5 className="d-inline">By <h5 className="d-inline text-primary">Setter Name </h5></h5>
-               <br></br>
-               <br></br>
-               <Navbar bg="light" expand="lg">
-                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                    <Navbar.Collapse id="basic-navbar-nav">
-                        <Nav variant="tabs" activeKey={window.location.pathname} className="mr-auto">
-                            <Nav.Link className="p-3 mr-4" href={"/problems/" + this.props.match.params.id}>Problem</Nav.Link>
-                            <Nav.Link className="p-3 mx-4" href={"/problems/" + this.props.match.params.id + "/submissions"}>Submissions</Nav.Link>
-                            <Nav.Link className="p-3 mx-4" href={"/problems/" + this.props.match.params.id + "/editorial"}>Editorial</Nav.Link>
-                        </Nav>
-                    </Navbar.Collapse>
-                </Navbar>
-                <br></br>
-                <p>
-                    You are given a string s, consisting of lowercase Latin letters. While there is at least one character in the string s that is repeated at least twice, you perform the following operation:
-                    you choose the index i (1≤i≤|s|) such that the character at position i occurs at least two times in the string s, and delete the character at position i, that is, replace s with s1s2…si−1si+1si+2…sn.
-                    For example, if s="codeforces", then you can apply the following sequence of operations:
-                    i=6⇒s="codefrces";
-                    i=1⇒s="odefrces";
-                    i=7⇒s="odefrcs";
-                    Given a given string s, find the lexicographically maximum string that can be obtained after applying a certain sequence of operations after which all characters in the string become unique.
+            <div className="offset-2 col-8">
+                { problem != null ?
+                (<div className="col-10 offset-1"> 
+                    <br></br>
+                    <h1>{problem.problemName}</h1>
+                    <h5 className="d-inline"><div>By <h5 className="d-inline text-primary">{problem.setterName} </h5></div></h5>
+                    <br></br>
+                    <br></br>
+                    <Navbar bg="light" expand="lg">
+                        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                        <Navbar.Collapse id="basic-navbar-nav">
+                            <Nav variant="tabs" activeKey={window.location.pathname} className="mr-auto">
+                                <Nav.Link className="p-3 mr-4" href={"/problems/" + this.props.match.params.id}>Problem</Nav.Link>
+                                <Nav.Link className="p-3 mx-4" href={"/problems/" + this.props.match.params.id + "/submissions"}>Submissions</Nav.Link>
+                                <Nav.Link className="p-3 mx-4" href={"/problems/" + this.props.match.params.id + "/editorial"}>Editorial</Nav.Link>
+                            </Nav>
+                        </Navbar.Collapse>
+                    </Navbar>
+                    <br></br>
+                    <h5 className="font-weight-bold">Problem Statement</h5>
+                    <p>
+                        {problem.problemDesc}
+                    </p>
+                    <h5 className="font-weight-bold">Input Format</h5>
+                    <p>
+                        The first line contains one integer t (1≤t≤104). Then t test cases follow.
 
-                    A string a of length n is lexicographically less than a string b of length m, if:
+                        Each test case is characterized by a string s, consisting of lowercase Latin letters (1≤|s|≤2⋅105).
 
-                    there is an index i (1≤i≤min(n,m)) such that the first i−1 characters of the strings a and b are the same, and the i-th character of the string a is less than i-th character of string b;
-                    or the first min(n,m) characters in the strings a and b are the same and n m
-                    For example the string is lexicographically less than the string b
+                        It is guaranteed that the sum of the lengths of the strings in all test cases does not exceed 2⋅105.
+                    </p>
+                    <h5 className="font-weight-bold">Output Format</h5>
+                    <p>
+                        For each test case, output the lexicographically maximum string that can be obtained after applying a certain sequence of operations after which all characters in the string become unique.
+                    </p>
+                    <h5 className="font-weight-bold">Constraints</h5>
+                    <ul>{constraintList}</ul>
 
-                </p>
-                <h5 className="font-weight-bold">Input Format</h5>
-                <p>
-                    The first line contains one integer t (1≤t≤104). Then t test cases follow.
+                    <p>Time Limit: {problem.timeLimit} <br/>Memory Limit: {problem.memoryLimit}</p>
+                    
+                    <br></br>
+                    <Navbar bg="light" expand="lg">
+                        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                        <Navbar.Collapse id="basic-navbar-nav">
+                            <Nav className="mr-auto">
+                            <NavDropdown title={this.state.currentLanguage} id="basic-nav-dropdown">
+                                {this.showLanguagesInDropdown()}
+                            </NavDropdown>
+                            </Nav>
+                            <Button onClick = {() => this.submitCode()}  variant="outline-primary">Submit</Button>
+                        </Navbar.Collapse>
+                    </Navbar>
+                    <AceEditor className="border" onChange = {(e) => this.updateCode(e)} showPrintMargin={false} width="100%"/>
+                    <br></br>
 
-                    Each test case is characterized by a string s, consisting of lowercase Latin letters (1≤|s|≤2⋅105).
+                    { submitted ? 
+                    (<div className="p-3 mb-3 bg-light text-dark">
+                        RESULT:
+                        {this.showResult()}
+                    </div>) : null
+                    }
 
-                    It is guaranteed that the sum of the lengths of the strings in all test cases does not exceed 2⋅105.
-                </p>
-                <h5 className="font-weight-bold">Output Format</h5>
-                <p>
-                    For each test case, output the lexicographically maximum string that can be obtained after applying a certain sequence of operations after which all characters in the string become unique.
-                </p>
-                <br></br>
-                <Navbar bg="light" expand="lg">
-                    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                    <Navbar.Collapse id="basic-navbar-nav">
-                        <Nav className="mr-auto">
-                        <NavDropdown title={this.state.currentLanguage} id="basic-nav-dropdown">
-                            {this.showLanguagesInDropdown()}
-                        </NavDropdown>
-                        </Nav>
-                        <Button variant="outline-primary">Submit</Button>
-                    </Navbar.Collapse>
-                </Navbar>
-                <AceEditor showPrintMargin={false} width="100%"/>
-                <br></br>
+                    { isCompilationSuccessful ?
+                    (<div className="container p-3 mb-4 bg-light text-dark">
+                        <div className="row">
+                            { this.showTestCasesResponse() }
+                        </div>
+                    </div>) : null
+                    }
+
+                </div>) : (<NotFound/>)
+                }
             </div>
         );
       }
