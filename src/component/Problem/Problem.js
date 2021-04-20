@@ -43,6 +43,7 @@ class Problem extends Component {
     }
 
     submitCode() {
+        this.setState({isCompilationSuccessful: false, verdict: null, submitted: false, noOfTestCases: 0, testCasesResponse: []})
         const loggedInUserName = sessionStorage.getItem(USER_NAME_SESSION_ATTRIBUTE_NAME);
         if (loggedInUserName == null) {
             this.props.history.push("/login");
@@ -67,7 +68,8 @@ class Problem extends Component {
                 }  
                 axios.post("http://localhost:8080/problems/" + this.state.problem.problemId + "/submit", body, axiosConfig)
                     .then((res) => {
-                        this.setState({verdict: res.data})
+                        console.log(res.data);
+                        this.setupWebSocket(res.data.submissionId);
                     }).catch((err) => {
                         console.log(err);
                 });
@@ -165,13 +167,13 @@ class Problem extends Component {
             })
     }
 
-    setupWebSocket() {
+    setupWebSocket(submissionId) {
         const socket = SockJS("http://localhost:8080/chat"); 
         const stompClient = Stomp.over(socket);
         var that = this;
         const userName = sessionStorage.getItem(USER_NAME_SESSION_ATTRIBUTE_NAME);
         stompClient.connect({}, () => {
-            stompClient.subscribe("/user/" + userName + "/queue/testCaseResponses", function(testCaseResponse) {
+            stompClient.subscribe("/user/" + userName + "/queue/" + submissionId + "/testCaseResponses", function(testCaseResponse) {
                 testCaseResponse = JSON.parse(testCaseResponse.body);
                 var testCaseNo = testCaseResponse["testCaseNo"];
                 var verdict = testCaseResponse["verdict"];
@@ -179,18 +181,22 @@ class Problem extends Component {
                 testCasesResponse[testCaseNo] = verdict;
                 that.setState({testCasesResponse: testCasesResponse});
             });
-            stompClient.subscribe("/user/" + userName + "/queue/compilationResponse", function(compilationResponse) {
+            stompClient.subscribe("/user/" + userName + "/queue/" + submissionId + "/compilationResponse", function(compilationResponse) {
                 compilationResponse = JSON.parse(compilationResponse.body);
                 var noOfTestCases = compilationResponse["noOfTestCases"];
                 var isCompilationSuccessful = compilationResponse["compilationSuccessful"];
                 that.setState({noOfTestCases: noOfTestCases, isCompilationSuccessful: isCompilationSuccessful});
             });
+            stompClient.subscribe("/user/" + userName + "/queue/" + submissionId + "/submissionResponse", function(submissionResponse) {
+                submissionResponse = JSON.parse(submissionResponse.body);
+                var verdict = submissionResponse["verdict"];
+                that.setState({verdict: verdict});
+            })
         });   
     }
 
     componentDidMount() {
         this.fetchProblem();
-        this.setupWebSocket();
     }
 
     render() {

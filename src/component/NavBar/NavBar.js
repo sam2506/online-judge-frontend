@@ -15,7 +15,7 @@ class NavBar extends Component {
     return (
       <div>
         <Navbar bg="light" expand="lg">
-          <Navbar.Brand href="/">Online Judge</Navbar.Brand>
+          <Navbar.Brand href="/">BitCode</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav activeKey={window.location.pathname} className="mr-auto">
