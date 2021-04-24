@@ -42,6 +42,14 @@ class Problem extends Component {
         this.setState({code: updatedCode});
     }
 
+    scrollToBottom() {
+        window.scroll({
+            top: document.body.offsetHeight,
+            left: 0, 
+            behavior: 'smooth'
+        });
+    }
+
     submitCode() {
         this.setState({isCompilationSuccessful: false, verdict: null, submitted: false, noOfTestCases: 0, testCasesResponse: []})
         const loggedInUserName = sessionStorage.getItem(USER_NAME_SESSION_ATTRIBUTE_NAME);
@@ -79,6 +87,7 @@ class Problem extends Component {
     }
 
     showTestCasesResponse() {
+        this.scrollToBottom();
         var testCases = [];
         var testCasesResponse = this.state.testCasesResponse;
         for(var i = 0 ; i < this.state.noOfTestCases ; i++) {

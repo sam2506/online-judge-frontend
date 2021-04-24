@@ -11,6 +11,7 @@ import NavBar from "./component/NavBar/NavBar";
 import Signup from "./component/Signup/Signup";
 import Problems from "./component/Problems/Problems"
 import Problem from "./component/Problem/Problem"
+import Contests from "./component/Contests/Contests"
 import Home from "./component/Home/Home"
 import NotFound from "./utils/NotFound/NotFound"
 import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "./service/AuthenticationService"
@@ -36,6 +37,7 @@ class App extends Component {
           <Switch location = { this.props.location }>
             <Route exact path="/" component={Home} />
             <Route exact path="/problems" component={Problems}/>
+            <Route exact path="/contests" component={Contests}/>
             <Route path="/problems/:id" component = {Problem} />
             <Route path="/login"
               render={(props) => (
