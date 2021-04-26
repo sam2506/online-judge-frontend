@@ -1,8 +1,78 @@
 import { Component } from "react";
 import { Jumbotron } from "react-bootstrap"
-import { Button } from "react-bootstrap"
+import axios from 'axios';
+import CountDown from 'react-countdown'
+import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
 
 class Home extends Component {
+    state = {
+        upcomingContests: []
+    }
+
+    fetchUpcomingContests() {
+        var upcomingContests = [];
+        const token = sessionStorage.getItem(USER_TOKEN_SESSION_ATTRIBUTE_NAME);
+        let axiosConfig = {
+            headers: {
+                "Authorization": token
+            }
+        };
+
+        axios.get("http://localhost:8080/contests/upcomingContest", axiosConfig)
+            .then(res => {
+                upcomingContests = res.data;
+                this.setState({ upcomingContests });
+            }).catch((err) => {
+                console.log(err);
+            })
+    }
+
+    zeroPadANumber(number) {
+        if(number < 10)
+            number = "0" + number;
+        return number;
+    }
+
+    renderer = ({ days, hours, minutes, seconds }) => {
+        days = this.zeroPadANumber(days);
+        hours = this.zeroPadANumber(hours);
+        minutes = this.zeroPadANumber(minutes);
+        seconds = this.zeroPadANumber(seconds);
+        return <div className="container">
+                    <div className="row">
+                        <div className="shadow-sm p-3 mb-5 bg-white rounded">{days}</div>
+                        <div className="mt-3">:</div> 
+                        <div className="shadow-sm p-3 mb-5 bg-white rounded">{hours}</div> 
+                        <div className="mt-3">:</div> 
+                        <div className="shadow-sm p-3 mb-5 bg-white rounded">{minutes}</div>
+                        <div className="mt-3">:</div> 
+                        <div className="shadow-sm p-3 mb-5 bg-white rounded">{seconds}</div>
+                    </div>
+                </div>
+                
+    };
+
+    showUpcomingContests() {
+        var upcomingContests = this.state.upcomingContests;
+        return upcomingContests.map((upcomingContest, index) => 
+            <div key = {index}>
+                <p>
+                    <a className="link-primary">{upcomingContest.contestName}</a>
+                    {console.log(new Date(upcomingContest.startTime) - new Date())}
+                </p>
+                <CountDown
+                    date={new Date(upcomingContest.startTime)}
+                    zeroPadTime={2}
+                    renderer={this.renderer}
+                />
+            </div>
+        )
+    }
+
+    componentDidMount() {
+        this.fetchUpcomingContests();
+    }
+
     render() {
         return (
             <div>
@@ -33,9 +103,11 @@ class Home extends Component {
                         </div>
                         <div className="col-4">
                             <div className="p-3">
-                                <h4>Upcoming Contests</h4>
+                                <h4>Upcoming Contest</h4>
                                 <hr></hr>
-                                <p><a className="link-primary">BitCode Round 1</a></p>
+                                { this.state.upcomingContests.length > 0 ?
+                                    (this.showUpcomingContests()) : <p>No upcoming contests in this week</p>
+                                }
                             </div>
                         </div>
                     </div>
