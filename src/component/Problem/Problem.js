@@ -220,7 +220,7 @@ class Problem extends Component {
             )
         }
         return (
-            <div className="offset-2 col-8">
+            <div className="offset-2 col-8 mt-4 shadow p-3 mb-5 bg-white rounded">
                 { problem != null ?
                 (<div className="col-10 offset-1"> 
                     <br></br>

@@ -14,7 +14,7 @@ class NavBar extends Component {
     const isUserLoggedIn = this.props.isLoggedInUser;
     return (
       <div>
-        <Navbar bg="light" expand="lg">
+        <Navbar style={{backgroundColor: "#163663"}} variant="dark" expand="lg">
           <Navbar.Brand href="/">BitCode</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">

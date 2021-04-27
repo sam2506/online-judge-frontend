@@ -77,7 +77,7 @@ class Home extends Component {
         return (
             <div>
                 <div className="col-8 offset-2 mt-3">
-                    <Jumbotron>
+                    <Jumbotron style={{backgroundColor: "#DAE4F2"}}>
                         <h2>
                             BitCode
                         </h2>
