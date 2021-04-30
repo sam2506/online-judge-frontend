@@ -24,7 +24,8 @@ class Problem extends Component {
         isCompilationSuccessful: false,
         testCasesResponse: [],
         verdict: null,
-        noOfTestCases: 0
+        noOfTestCases: 0,
+        showLanguageSelectAlert: false
     }
 
     selectLanguage(e, language) {
@@ -58,7 +59,7 @@ class Problem extends Component {
         } else {
             const currentLanguage = this.state.currentLanguage
             if(!this.state.languages.includes(currentLanguage)) {
-                alert("Please select any language");
+                this.setState({showLanguageSelectAlert: true});
             } else {
                 let axiosConfig = {
                     headers: {
@@ -261,6 +262,13 @@ class Problem extends Component {
                     <p>Time Limit: {problem.timeLimit} <br/>Memory Limit: {problem.memoryLimit}</p>
                     
                     <br></br>
+
+                    { !this.state.languages.includes(this.state.currentLanguage) && this.state.showLanguageSelectAlert ?
+                    (<div className="alert alert-dark alert-dismissible fade show" role="alert">
+                        <strong>Error!!</strong> Please select any langauge.
+                    </div>) : null
+                    }
+
                     <Navbar bg="light" expand="lg">
                         <Navbar.Toggle aria-controls="basic-navbar-nav" />
                         <Navbar.Collapse id="basic-navbar-nav">
