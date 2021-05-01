@@ -3,6 +3,7 @@ import { Jumbotron } from "react-bootstrap"
 import axios from 'axios';
 import CountDown from 'react-countdown'
 import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
+import CountDownTimer from "../../utils/CountDownTimer/CountDownTimer";
 
 class Home extends Component {
     state = {
@@ -27,31 +28,6 @@ class Home extends Component {
             })
     }
 
-    zeroPadANumber(number) {
-        if(number < 10)
-            number = "0" + number;
-        return number;
-    }
-
-    renderer = ({ days, hours, minutes, seconds }) => {
-        days = this.zeroPadANumber(days);
-        hours = this.zeroPadANumber(hours);
-        minutes = this.zeroPadANumber(minutes);
-        seconds = this.zeroPadANumber(seconds);
-        return <div className="container">
-                    <div className="row">
-                        <div className="shadow-sm p-3 mb-5 bg-white rounded">{days}</div>
-                        <div className="mt-3">:</div> 
-                        <div className="shadow-sm p-3 mb-5 bg-white rounded">{hours}</div> 
-                        <div className="mt-3">:</div> 
-                        <div className="shadow-sm p-3 mb-5 bg-white rounded">{minutes}</div>
-                        <div className="mt-3">:</div> 
-                        <div className="shadow-sm p-3 mb-5 bg-white rounded">{seconds}</div>
-                    </div>
-                </div>
-                
-    };
-
     showUpcomingContests() {
         var upcomingContests = this.state.upcomingContests;
         return upcomingContests.map((upcomingContest, index) => 
@@ -60,11 +36,7 @@ class Home extends Component {
                     <a className="link-primary">{upcomingContest.contestName}</a>
                     {console.log(new Date(upcomingContest.startTime) - new Date())}
                 </p>
-                <CountDown
-                    date={new Date(upcomingContest.startTime)}
-                    zeroPadTime={2}
-                    renderer={this.renderer}
-                />
+                <CountDownTimer time={upcomingContest.startTime}/>
             </div>
         )
     }

@@ -12,6 +12,7 @@ import Signup from "./component/Signup/Signup";
 import Problems from "./component/Problems/Problems"
 import Problem from "./component/Problem/Problem"
 import Contests from "./component/Contests/Contests"
+import Contest from "./component/Contest/Contest"
 import Home from "./component/Home/Home"
 import NotFound from "./utils/NotFound/NotFound"
 import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "./service/AuthenticationService"
@@ -39,6 +40,7 @@ class App extends Component {
             <Route exact path="/problems" component={Problems}/>
             <Route exact path="/contests" component={Contests}/>
             <Route path="/problems/:id" component = {Problem} />
+            <Route path="/contests/:id" component={Contest} />
             <Route path="/login"
               render={(props) => (
               <Login {...props} updateLoggedIn = {() => this.updateLoggedIn()} />
