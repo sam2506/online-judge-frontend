@@ -39,8 +39,9 @@ class App extends Component {
             <Route exact path="/" component={Home} />
             <Route exact path="/problems" component={Problems}/>
             <Route exact path="/contests" component={Contests}/>
-            <Route path="/problems/:id" component = {Problem} />
-            <Route path="/contests/:id" component={Contest} />
+            <Route exact path="/problems/:problemId" component={Problem} />
+            <Route exact path="/contests/:contestId" component={Contest} />
+            <Route path="/contests/:contestId/problems/:problemId" component={Problem} />
             <Route path="/login"
               render={(props) => (
               <Login {...props} updateLoggedIn = {() => this.updateLoggedIn()} />

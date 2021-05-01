@@ -1,7 +1,7 @@
 import { Component } from "react";
 import 'bootstrap/dist/css/bootstrap.css';
 import axios from 'axios';
-import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
+import { USER_NAME_SESSION_ATTRIBUTE_NAME, USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
 import { Jumbotron } from "react-bootstrap";
 import { Button } from 'react-bootstrap';
 import CountDownTimer from "../../utils/CountDownTimer/CountDownTimer"
@@ -10,11 +10,12 @@ import NotFound from "../../utils/NotFound/NotFound";
 class Contest extends Component {
 
     state = {
-        contest: null
+        contest: null,
+        currentRank: "NA"
     }
     
     fetchContest() {
-        const contestId = this.props.match.params.id;
+        const contestId = this.props.match.params.contestId;
         const token = sessionStorage.getItem(USER_TOKEN_SESSION_ATTRIBUTE_NAME);
         let axiosConfig = {
             headers: {
@@ -49,14 +50,38 @@ class Contest extends Component {
             <Jumbotron className="p-3" style={{backgroundColor: "#DAE4F2"}} key={index}>
                 <div className="row">
                     <div className="col-10"><h5 className="mt-1">{index+1}. {problem.problemName}</h5></div>
-                    <div className="col-2"><Button variant="outline-primary">Solve Problem</Button></div>
+                    <div className="col-2">
+                        <a href={ "/contests/" + this.props.match.params.contestId + "/problems/" + problem.problemId}><Button variant="outline-primary">Solve Problem</Button></a>
+                    </div>
                 </div>
             </Jumbotron>
         )
     }
 
+    getCurrentRank() {
+        const contestId = this.props.match.params.contestId;
+        const token = sessionStorage.getItem(USER_TOKEN_SESSION_ATTRIBUTE_NAME);
+        const loggedInUserName = sessionStorage.getItem(USER_NAME_SESSION_ATTRIBUTE_NAME);
+        let axiosConfig = {
+            headers: {
+                "Authorization": token
+            }
+        };
+        const params = {
+            userName: loggedInUserName
+        }
+        axios.get("http://localhost:8080/contests/" + contestId + "/leaderboard", {params: params}, axiosConfig)
+            .then(res => {
+                console.log(res.data)
+                this.setState({currentRank: res.data + 1});
+            }).catch((err) => {
+                console.log(err);
+            })
+    }
+
     componentDidMount() {
         this.fetchContest();
+        setInterval(this.getCurrentRank(), 10000)
     }
 
     render() {
@@ -74,7 +99,7 @@ class Contest extends Component {
                             {this.showProblems()}
                         </div>
                         <div className="ml-3 col-3">
-                            <h4>Current Rank: </h4>
+                            <h4>Current Rank: {this.state.currentRank}</h4>
                             <br></br>
                             <h5>Contest ends in: </h5>
                             <CountDownTimer time={this.state.contest.endTime}/>

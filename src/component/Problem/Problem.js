@@ -25,7 +25,8 @@ class Problem extends Component {
         testCasesResponse: [],
         verdict: null,
         noOfTestCases: 0,
-        showLanguageSelectAlert: false
+        showLanguageSelectAlert: false,
+        showContestEndedAlert: false
     }
 
     selectLanguage(e, language) {
@@ -69,20 +70,32 @@ class Problem extends Component {
                     }
                 };
                 const body = {
-                    submissionId: "sub_id_9",
+                    submissionId: "sub_id_11",
                     problemId: this.state.problem.problemId,
                     userName: loggedInUserName,
                     code: this.state.code,
                     languageId: currentLanguage
+                }
+                const problemId = this.props.match.params.problemId;
+                const contestId = this.props.match.params.contestId;
+                var codeSubmitUrl;
+                if(contestId == undefined) {
+                    codeSubmitUrl = "http://localhost:8080/problems/" + problemId + "/submit";
+                } else {
+                    body.contestId = contestId;
+                    codeSubmitUrl = "http://localhost:8080/contests/" + contestId + "/problem/" + problemId + "/submit";
                 }  
-                axios.post("http://localhost:8080/problems/" + this.state.problem.problemId + "/submit", body, axiosConfig)
+                axios.post(codeSubmitUrl, body, axiosConfig)
                     .then((res) => {
                         console.log(res.data);
+                        this.setState({submitted: true})
                         this.setupWebSocket(res.data.submissionId);
                     }).catch((err) => {
                         console.log(err);
+                        if(err.response.data.message == "contest has ended") {
+                            this.setState({showContestEndedAlert: true})
+                        }
                 });
-                this.setState({submitted: true})
             }
         }
     }
@@ -159,15 +172,21 @@ class Problem extends Component {
     }
 
     fetchProblem() {
-        const problemId = this.props.match.params.id;
+        const problemId = this.props.match.params.problemId;
+        const contestId = this.props.match.params.contestId;
         const token = sessionStorage.getItem(USER_TOKEN_SESSION_ATTRIBUTE_NAME);
         let axiosConfig = {
             headers: {
                 "Authorization": token
             }
         };
-
-        axios.get("http://localhost:8080/problems/" + problemId, axiosConfig)
+        var problemFetchUrl;
+        if(contestId == undefined) {
+            problemFetchUrl = "http://localhost:8080/problems/" + problemId;
+        } else {
+            problemFetchUrl = "http://localhost:8080/contests/" + contestId + "/problem/" + problemId;
+        }
+        axios.get(problemFetchUrl, axiosConfig)
             .then(res => {
                 const problem = res.data;
                 console.log(problem);
@@ -220,6 +239,14 @@ class Problem extends Component {
                constraintList.push(<li key={index}>{constraint}</li>)
             )
         }
+        var problemUrl;
+        const problemId = this.props.match.params.problemId;
+        const contestId = this.props.match.params.contestId;
+        if(contestId == undefined) {
+            problemUrl = "/problems/" + problemId;
+        } else {
+            problemUrl = "/contests/" + contestId + "/problems/" + problemId;
+        }
         return (
             <div className="offset-2 col-8 mt-4 shadow p-3 mb-5 bg-white rounded">
                 { problem != null ?
@@ -233,9 +260,9 @@ class Problem extends Component {
                         <Navbar.Toggle aria-controls="basic-navbar-nav" />
                         <Navbar.Collapse id="basic-navbar-nav">
                             <Nav variant="tabs" activeKey={window.location.pathname} className="mr-auto">
-                                <Nav.Link className="p-3 mr-4" href={"/problems/" + this.props.match.params.id}>Problem</Nav.Link>
-                                <Nav.Link className="p-3 mx-4" href={"/problems/" + this.props.match.params.id + "/submissions"}>Submissions</Nav.Link>
-                                <Nav.Link className="p-3 mx-4" href={"/problems/" + this.props.match.params.id + "/editorial"}>Editorial</Nav.Link>
+                                <Nav.Link className="p-3 mr-4" href={problemUrl}>Problem</Nav.Link>
+                                <Nav.Link className="p-3 mx-4" href={problemUrl + "/submissions"}>Submissions</Nav.Link>
+                                <Nav.Link className="p-3 mx-4" href={problemUrl + "/editorial"}>Editorial</Nav.Link>
                             </Nav>
                         </Navbar.Collapse>
                     </Navbar>
@@ -297,7 +324,12 @@ class Problem extends Component {
                         </div>
                     </div>) : null
                     }
-
+                    { this.state.showContestEndedAlert ?
+                    (<div className="alert alert-dark alert-dismissible fade show" role="alert">
+                        Contest has ended.
+                        {this.scrollToBottom()}
+                    </div>) : null
+                    }
                 </div>) : (<NotFound/>)
                 }
             </div>
