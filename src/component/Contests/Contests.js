@@ -29,8 +29,7 @@ class Contests extends Component {
             })
     }
 
-    showContestList() {
-        var contests = this.state.contests;
+    showContestList(contests) {
         var contestList = contests.map((contest, index) =>
             <tr key = {contest.contestId}>
                 <td>{ index + 1 }</td>
@@ -49,15 +48,62 @@ class Contests extends Component {
         )
     }
 
+    sortContestByStartTime(contest1, contest2) {
+        if ( contest1.startTime < contest2.startTime ){
+          return -1;
+        }
+        if ( contest1.startTime > contest2.startTime ){
+          return 1;
+        }
+        return 0;
+    }
+
+    sortContestByStartTimeInReverse(contest1, contest2) {
+        if ( contest1.startTime < contest2.startTime ){
+          return 1;
+        }
+        if ( contest1.startTime > contest2.startTime ){
+          return -1;
+        }
+        return 0;
+    }
+
+    showCurrentOrUpcomingContestList() {
+        var currentOrUpcomingContests = [];
+        const contests = this.state.contests;
+        var currentTime = new Date();
+        contests.map((contest) => {
+            if(new Date(contest.endTime) > currentTime) {
+                currentOrUpcomingContests.push(contest)
+            }
+        })
+        currentOrUpcomingContests.sort(this.sortContestByStartTime);
+        return this.showContestList(currentOrUpcomingContests)
+    }
+
+    showPastContestList() {
+        var pastContests = [];
+        const contests = this.state.contests;
+        var currentTime = new Date();
+        contests.map((contest) => {
+            if(new Date(contest.endTime) < currentTime) {
+                pastContests.push(contest)
+            }
+        })
+        pastContests.sort(this.sortContestByStartTimeInReverse);
+        return this.showContestList(pastContests)
+    }
+
     componentDidMount() {
         this.fetchContests();
     }
 
     render() {
         return (
-            <div className="col-10 offset-1"> 
+            <div className="col-8 offset-2"> 
                 <br></br>
-                <Table striped bordered hover>
+                <h4>Current or Upcoming Contests</h4>
+                <Table className="m-4" striped bordered hover>
                     <thead>
                         <tr>
                         <th>#</th>
@@ -67,7 +113,21 @@ class Contests extends Component {
                         <th>Duration</th>
                         </tr>
                     </thead>
-                    { this.showContestList() }
+                    { this.showCurrentOrUpcomingContestList() }
+                </Table>
+                <br></br>
+                <h4>Past Contests</h4>
+                <Table className="m-4" striped bordered hover>
+                    <thead>
+                        <tr>
+                        <th>#</th>
+                        <th>Contest Name</th>
+                        <th>Moderators</th>
+                        <th>Start Time</th>
+                        <th>Duration</th>
+                        </tr>
+                    </thead>
+                    { this.showPastContestList() }
                 </Table>
             </div>
         );
