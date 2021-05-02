@@ -9,7 +9,6 @@ import AceEditor from 'react-ace';
 import axios from 'axios';
 import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
 import { USER_NAME_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
-import NotFound from "../../utils/NotFound/NotFound";
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 
@@ -18,7 +17,6 @@ class Problem extends Component {
     state = {
         languages: ["CPP", "C", "JAVA", "PYTHON"],
         currentLanguage: "Select Language",
-        problem: null,
         code: "",
         submitted: false,
         isCompilationSuccessful: false,
@@ -70,8 +68,8 @@ class Problem extends Component {
                     }
                 };
                 const body = {
-                    submissionId: "sub_id_11",
-                    problemId: this.state.problem.problemId,
+                    submissionId: "sub_id_9",
+                    problemId: this.props.problem.problemId,
                     userName: loggedInUserName,
                     code: this.state.code,
                     languageId: currentLanguage
@@ -171,31 +169,6 @@ class Problem extends Component {
         }
     }
 
-    fetchProblem() {
-        const problemId = this.props.match.params.problemId;
-        const contestId = this.props.match.params.contestId;
-        const token = sessionStorage.getItem(USER_TOKEN_SESSION_ATTRIBUTE_NAME);
-        let axiosConfig = {
-            headers: {
-                "Authorization": token
-            }
-        };
-        var problemFetchUrl;
-        if(contestId == undefined) {
-            problemFetchUrl = "http://localhost:8080/problems/" + problemId;
-        } else {
-            problemFetchUrl = "http://localhost:8080/contests/" + contestId + "/problem/" + problemId;
-        }
-        axios.get(problemFetchUrl, axiosConfig)
-            .then(res => {
-                const problem = res.data;
-                console.log(problem);
-                this.setState({ problem });
-            }).catch((err) => {
-                console.log(err);
-            })
-    }
-
     setupWebSocket(submissionId) {
         const socket = SockJS("http://localhost:8080/chat"); 
         const stompClient = Stomp.over(socket);
@@ -224,14 +197,10 @@ class Problem extends Component {
         });   
     }
 
-    componentDidMount() {
-        this.fetchProblem();
-    }
-
     render() {
         const submitted = this.state.submitted;
         const isCompilationSuccessful = this.state.isCompilationSuccessful;
-        const problem = this.state.problem;
+        const problem = this.props.problem;
         const constraintList = [];
         if(problem != null) {
             const constraints = problem.constraints;
@@ -248,25 +217,9 @@ class Problem extends Component {
             problemUrl = "/contests/" + contestId + "/problems/" + problemId;
         }
         return (
-            <div className="offset-2 col-8 mt-4 shadow p-3 mb-5 bg-white rounded">
+            <div>
                 { problem != null ?
-                (<div className="col-10 offset-1"> 
-                    <br></br>
-                    <h1>{problem.problemName}</h1>
-                    <h5 className="d-inline"><div>By <h5 className="d-inline text-primary">{problem.setterName} </h5></div></h5>
-                    <br></br>
-                    <br></br>
-                    <Navbar bg="light" expand="lg">
-                        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                        <Navbar.Collapse id="basic-navbar-nav">
-                            <Nav variant="tabs" activeKey={window.location.pathname} className="mr-auto">
-                                <Nav.Link className="p-3 mr-4" href={problemUrl}>Problem</Nav.Link>
-                                <Nav.Link className="p-3 mx-4" href={problemUrl + "/submissions"}>Submissions</Nav.Link>
-                                <Nav.Link className="p-3 mx-4" href={problemUrl + "/editorial"}>Editorial</Nav.Link>
-                            </Nav>
-                        </Navbar.Collapse>
-                    </Navbar>
-                    <br></br>
+                (<div> 
                     <h5 className="font-weight-bold">Problem Statement</h5>
                     <p>
                         {problem.problemDesc}
@@ -330,7 +283,7 @@ class Problem extends Component {
                         {this.scrollToBottom()}
                     </div>) : null
                     }
-                </div>) : (<NotFound/>)
+                </div>) : null
                 }
             </div>
         );

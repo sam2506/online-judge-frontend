@@ -10,12 +10,12 @@ import Login from "./component/Login/Login";
 import NavBar from "./component/NavBar/NavBar";
 import Signup from "./component/Signup/Signup";
 import Problems from "./component/Problems/Problems"
-import Problem from "./component/Problem/Problem"
 import Contests from "./component/Contests/Contests"
 import Contest from "./component/Contest/Contest"
 import Home from "./component/Home/Home"
 import NotFound from "./utils/NotFound/NotFound"
 import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "./service/AuthenticationService"
+import ProblemContainer from "./component/ProblemContainer/ProblemContainer";
 
 class App extends Component {
   state = {
@@ -39,9 +39,9 @@ class App extends Component {
             <Route exact path="/" component={Home} />
             <Route exact path="/problems" component={Problems}/>
             <Route exact path="/contests" component={Contests}/>
-            <Route exact path="/problems/:problemId" component={Problem} />
+            <Route exact path="/problems/:problemId" component={ProblemContainer} />
             <Route exact path="/contests/:contestId" component={Contest} />
-            <Route path="/contests/:contestId/problems/:problemId" component={Problem} />
+            <Route path="/contests/:contestId/problems/:problemId" component={ProblemContainer} />
             <Route path="/login"
               render={(props) => (
               <Login {...props} updateLoggedIn = {() => this.updateLoggedIn()} />
