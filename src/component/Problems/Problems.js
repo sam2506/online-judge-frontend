@@ -51,9 +51,10 @@ class Problems extends Component {
 
     render() {
         return (
-            <div className="col-10 offset-1"> 
+            <div className="col-8 offset-2">
                 <br></br>
-                <Table striped bordered hover>
+                <h4>Problems List</h4> 
+                <Table className="m-4" striped bordered hover>
                     <thead>
                         <tr>
                         <th>#</th>
