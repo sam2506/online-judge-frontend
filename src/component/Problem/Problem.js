@@ -171,7 +171,7 @@ class Problem extends Component {
     }
 
     setupWebSocket(submissionId) {
-        const socket = SockJS("http://localhost:8080/chat"); 
+        const socket = SockJS(JUDGE_DOMAIN + "/chat"); 
         const stompClient = Stomp.over(socket);
         var that = this;
         const userName = sessionStorage.getItem(USER_NAME_SESSION_ATTRIBUTE_NAME);
