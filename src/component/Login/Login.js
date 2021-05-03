@@ -24,7 +24,7 @@ class Login extends Component {
           userName: this.state.userName,
           password: this.state.password
       };
-      axios.post("http://localhost:8080/signin", body, axiosConfig)
+      axios.post("/signin", body, axiosConfig)
           .then((res) => {
             AuthenticationService.registerSuccessfulLoginForJwt(this.state.userName, res.data.accessToken, res.data.tokenType);
             this.props.updateLoggedIn();

@@ -38,7 +38,7 @@ class Signup extends Component {
             emailId: this.state.email,
             password: this.state.password
         };
-        axios.post("http://localhost:8080/signup", body, axiosConfig)
+        axios.post("/signup", body, axiosConfig)
             .then((res) => {
                 this.setState({
                     firstName: "",

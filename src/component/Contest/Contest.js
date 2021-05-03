@@ -23,7 +23,7 @@ class Contest extends Component {
             }
         };
 
-        axios.get("http://localhost:8080/contests/" + contestId, axiosConfig)
+        axios.get("/contests/" + contestId, axiosConfig)
             .then(res => {
                 const contest = res.data;
                 console.log(contest);
@@ -70,7 +70,7 @@ class Contest extends Component {
         const params = {
             userName: loggedInUserName
         }
-        axios.get("http://localhost:8080/contests/" + contestId + "/leaderboard", {params: params}, axiosConfig)
+        axios.get("/contests/" + contestId + "/leaderboard", {params: params}, axiosConfig)
             .then(res => {
                 console.log(res.data)
                 this.setState({currentRank: res.data + 1});

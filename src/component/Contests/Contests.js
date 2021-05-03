@@ -19,7 +19,7 @@ class Contests extends Component {
             }
         };
 
-        axios.get("http://localhost:8080/contests", axiosConfig)
+        axios.get("/contests", axiosConfig)
             .then(res => {
                 contests = res.data;
                 console.log(contests);

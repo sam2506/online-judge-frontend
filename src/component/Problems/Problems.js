@@ -19,7 +19,7 @@ class Problems extends Component {
             }
         };
 
-        axios.get("http://localhost:8080/problems", axiosConfig)
+        axios.get("/problems", axiosConfig)
             .then(res => {
                 problems = res.data;
                 console.log(problems);

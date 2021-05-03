@@ -28,9 +28,9 @@ class ProblemContainer extends Component {
         };
         var problemFetchUrl;
         if(contestId == undefined) {
-            problemFetchUrl = "http://localhost:8080/problems/" + problemId;
+            problemFetchUrl = "/problems/" + problemId;
         } else {
-            problemFetchUrl = "http://localhost:8080/contests/" + contestId + "/problem/" + problemId;
+            problemFetchUrl = "/contests/" + contestId + "/problem/" + problemId;
         }
         axios.get(problemFetchUrl, axiosConfig)
             .then(res => {

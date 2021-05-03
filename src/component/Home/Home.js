@@ -19,7 +19,7 @@ class Home extends Component {
             }
         };
 
-        axios.get("http://localhost:8080/contests/upcomingContest", axiosConfig)
+        axios.get("/contests/upcomingContest", axiosConfig)
             .then(res => {
                 upcomingContests = res.data;
                 this.setState({ upcomingContests });

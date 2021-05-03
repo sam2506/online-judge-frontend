@@ -78,10 +78,10 @@ class Problem extends Component {
                 const contestId = this.props.match.params.contestId;
                 var codeSubmitUrl;
                 if(contestId == undefined) {
-                    codeSubmitUrl = "http://localhost:8080/problems/" + problemId + "/submit";
+                    codeSubmitUrl = "/problems/" + problemId + "/submit";
                 } else {
                     body.contestId = contestId;
-                    codeSubmitUrl = "http://localhost:8080/contests/" + contestId + "/problem/" + problemId + "/submit";
+                    codeSubmitUrl = "/contests/" + contestId + "/problem/" + problemId + "/submit";
                 }  
                 axios.post(codeSubmitUrl, body, axiosConfig)
                     .then((res) => {
