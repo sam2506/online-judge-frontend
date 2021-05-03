@@ -11,6 +11,7 @@ import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationS
 import { USER_NAME_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
+import { JUDGE_DOMAIN } from "../../config";
 
 class Problem extends Component {
 
@@ -68,7 +69,7 @@ class Problem extends Component {
                     }
                 };
                 const body = {
-                    submissionId: "sub_id_9",
+                    submissionId: "sub_id_11",
                     problemId: this.props.problem.problemId,
                     userName: loggedInUserName,
                     code: this.state.code,
@@ -78,10 +79,10 @@ class Problem extends Component {
                 const contestId = this.props.match.params.contestId;
                 var codeSubmitUrl;
                 if(contestId == undefined) {
-                    codeSubmitUrl = "/problems/" + problemId + "/submit";
+                    codeSubmitUrl = JUDGE_DOMAIN + "/problems/" + problemId + "/submit";
                 } else {
                     body.contestId = contestId;
-                    codeSubmitUrl = "/contests/" + contestId + "/problem/" + problemId + "/submit";
+                    codeSubmitUrl = JUDGE_DOMAIN + "/contests/" + contestId + "/problem/" + problemId + "/submit";
                 }  
                 axios.post(codeSubmitUrl, body, axiosConfig)
                     .then((res) => {

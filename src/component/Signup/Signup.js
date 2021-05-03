@@ -5,6 +5,7 @@ import { Button } from 'react-bootstrap';
 import { Modal } from 'react-bootstrap';
 import axios from "axios";
 import {withRouter} from 'react-router-dom';
+import { JUDGE_DOMAIN } from "../../config";
 
 class Signup extends Component {
 
@@ -38,7 +39,7 @@ class Signup extends Component {
             emailId: this.state.email,
             password: this.state.password
         };
-        axios.post("/signup", body, axiosConfig)
+        axios.post(JUDGE_DOMAIN + "/signup", body, axiosConfig)
             .then((res) => {
                 this.setState({
                     firstName: "",

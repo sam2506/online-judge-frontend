@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import { Table } from 'react-bootstrap';
 import axios from 'axios';
 import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
+import { JUDGE_DOMAIN } from "../../config"
 
 class Contests extends Component {
 
@@ -19,7 +20,7 @@ class Contests extends Component {
             }
         };
 
-        axios.get("/contests", axiosConfig)
+        axios.get(JUDGE_DOMAIN + "/contests", axiosConfig)
             .then(res => {
                 contests = res.data;
                 console.log(contests);

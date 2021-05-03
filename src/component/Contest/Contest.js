@@ -6,6 +6,7 @@ import { Jumbotron } from "react-bootstrap";
 import { Button } from 'react-bootstrap';
 import CountDownTimer from "../../utils/CountDownTimer/CountDownTimer"
 import NotFound from "../../utils/NotFound/NotFound";
+import { JUDGE_DOMAIN } from "../../config";
 
 class Contest extends Component {
 
@@ -23,7 +24,7 @@ class Contest extends Component {
             }
         };
 
-        axios.get("/contests/" + contestId, axiosConfig)
+        axios.get(JUDGE_DOMAIN + "/contests/" + contestId, axiosConfig)
             .then(res => {
                 const contest = res.data;
                 console.log(contest);
@@ -70,7 +71,7 @@ class Contest extends Component {
         const params = {
             userName: loggedInUserName
         }
-        axios.get("/contests/" + contestId + "/leaderboard", {params: params}, axiosConfig)
+        axios.get(JUDGE_DOMAIN + "/contests/" + contestId + "/leaderboard", {params: params}, axiosConfig)
             .then(res => {
                 console.log(res.data)
                 this.setState({currentRank: res.data + 1});

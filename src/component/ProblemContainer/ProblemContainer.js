@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import Problem from "../Problem/Problem";
 import NotFound from "../../utils/NotFound/NotFound";
+import { JUDGE_DOMAIN } from "../../config";
 
 class ProblemContainer extends Component {
 
@@ -28,9 +29,9 @@ class ProblemContainer extends Component {
         };
         var problemFetchUrl;
         if(contestId == undefined) {
-            problemFetchUrl = "/problems/" + problemId;
+            problemFetchUrl = JUDGE_DOMAIN + "/problems/" + problemId;
         } else {
-            problemFetchUrl = "/contests/" + contestId + "/problem/" + problemId;
+            problemFetchUrl = JUDGE_DOMAIN + "/contests/" + contestId + "/problem/" + problemId;
         }
         axios.get(problemFetchUrl, axiosConfig)
             .then(res => {

@@ -1,0 +1,1 @@
+export const JUDGE_DOMAIN = "http://localhost:8080"

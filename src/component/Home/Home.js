@@ -4,6 +4,7 @@ import axios from 'axios';
 import CountDown from 'react-countdown'
 import { USER_TOKEN_SESSION_ATTRIBUTE_NAME } from "../../service/AuthenticationService"
 import CountDownTimer from "../../utils/CountDownTimer/CountDownTimer";
+import { JUDGE_DOMAIN } from "../../config"
 
 class Home extends Component {
     state = {
@@ -19,7 +20,7 @@ class Home extends Component {
             }
         };
 
-        axios.get("/contests/upcomingContest", axiosConfig)
+        axios.get(JUDGE_DOMAIN + "/contests/upcomingContest", axiosConfig)
             .then(res => {
                 upcomingContests = res.data;
                 this.setState({ upcomingContests });

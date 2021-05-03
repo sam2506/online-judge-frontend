@@ -5,6 +5,7 @@ import { Button } from 'react-bootstrap';
 import axios from 'axios';
 import AuthenticationService from '../../service/AuthenticationService';
 import {withRouter} from 'react-router-dom';
+import { JUDGE_DOMAIN } from "../../config";
 
 class Login extends Component {
 
@@ -24,7 +25,7 @@ class Login extends Component {
           userName: this.state.userName,
           password: this.state.password
       };
-      axios.post("/signin", body, axiosConfig)
+      axios.post(JUDGE_DOMAIN + "/signin", body, axiosConfig)
           .then((res) => {
             AuthenticationService.registerSuccessfulLoginForJwt(this.state.userName, res.data.accessToken, res.data.tokenType);
             this.props.updateLoggedIn();
