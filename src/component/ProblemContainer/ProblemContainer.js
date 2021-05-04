@@ -11,11 +11,13 @@ import {
 import Problem from "../Problem/Problem";
 import NotFound from "../../utils/NotFound/NotFound";
 import { JUDGE_DOMAIN } from "../../config";
+import Loading from "../Loading/Loading";
 
 class ProblemContainer extends Component {
 
     state = {
-        problem: null
+        problem: null,
+        loading: true
     }
 
     fetchProblem() {
@@ -37,9 +39,10 @@ class ProblemContainer extends Component {
             .then(res => {
                 const problem = res.data;
                 console.log(problem);
-                this.setState({ problem });
+                this.setState({problem: problem, loading: false});
             }).catch((err) => {
                 console.log(err);
+                this.setState({loading: false})
             })
     }
 
@@ -58,38 +61,42 @@ class ProblemContainer extends Component {
             problemUrl = "/contests/" + contestId + "/problems/" + problemId;
         }
         return (
-            <div className="offset-2 col-8 mt-4 shadow p-3 mb-5 bg-white rounded">
-                { problem != null ?
-                (<div className="col-10 offset-1"> 
-                    <br></br>
-                    <h1>{problem.problemName}</h1>
-                    <h5 className="d-inline"><div>By <h5 className="d-inline text-primary">{problem.setterName} </h5></div></h5>
-                    <br></br>
-                    <br></br>
-                    <Navbar bg="light" expand="lg">
-                        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                        <Navbar.Collapse id="basic-navbar-nav">
-                            <Nav variant="tabs" activeKey={window.location.pathname} className="mr-auto">
-                                <Nav.Link className="p-3 mr-4" href={problemUrl}>Problem</Nav.Link>
-                                <Nav.Link className="p-3 mx-4" href={problemUrl + "/submissions"}>Submissions</Nav.Link>
-                                <Nav.Link className="p-3 mx-4" href={problemUrl + "/editorial"}>Editorial</Nav.Link>
-                            </Nav>
-                        </Navbar.Collapse>
-                    </Navbar>
-                    <br></br>
-                    <Switch location = { this.props.location }>
-                        <Route exact path="/problems/:problemId"
-                            render={(props) => (
-                                <Problem {...props} problem = {this.state.problem}/>
-                            )}
-                        />
-                        <Route exact path="/contests/:contestId/problems/:problemId"
-                            render={(props) => (
-                                <Problem {...props} problem = {this.state.problem}/>
-                            )}
-                        />
-                    </Switch>
-                </div>) : (<NotFound/>)
+            <div>
+                { ! this.state.loading ?
+                (<div className="offset-2 col-8 mt-4 shadow p-3 mb-5 bg-white rounded">
+                    { problem != null ?
+                    (<div className="col-10 offset-1"> 
+                        <br></br>
+                        <h1>{problem.problemName}</h1>
+                        <h5 className="d-inline"><div>By <h5 className="d-inline text-primary">{problem.setterName} </h5></div></h5>
+                        <br></br>
+                        <br></br>
+                        <Navbar bg="light" expand="lg">
+                            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                            <Navbar.Collapse id="basic-navbar-nav">
+                                <Nav variant="tabs" activeKey={window.location.pathname} className="mr-auto">
+                                    <Nav.Link className="p-3 mr-4" href={problemUrl}>Problem</Nav.Link>
+                                    <Nav.Link className="p-3 mx-4" href={problemUrl + "/submissions"}>Submissions</Nav.Link>
+                                    <Nav.Link className="p-3 mx-4" href={problemUrl + "/editorial"}>Editorial</Nav.Link>
+                                </Nav>
+                            </Navbar.Collapse>
+                        </Navbar>
+                        <br></br>
+                        <Switch location = { this.props.location }>
+                            <Route exact path="/problems/:problemId"
+                                render={(props) => (
+                                    <Problem {...props} problem = {this.state.problem}/>
+                                )}
+                            />
+                            <Route exact path="/contests/:contestId/problems/:problemId"
+                                render={(props) => (
+                                    <Problem {...props} problem = {this.state.problem}/>
+                                )}
+                            />
+                        </Switch>
+                    </div>) : (<NotFound/>)
+                    }
+                </div>) : <Loading />
                 }
             </div>
         );

@@ -7,12 +7,14 @@ import { Button } from 'react-bootstrap';
 import CountDownTimer from "../../utils/CountDownTimer/CountDownTimer"
 import NotFound from "../../utils/NotFound/NotFound";
 import { JUDGE_DOMAIN } from "../../config";
+import Loading from "../Loading/Loading";
 
 class Contest extends Component {
 
     state = {
         contest: null,
-        currentRank: "NA"
+        currentRank: "NA",
+        loading: true
     }
     
     fetchContest() {
@@ -28,10 +30,11 @@ class Contest extends Component {
             .then(res => {
                 const contest = res.data;
                 console.log(contest);
-                this.setState({ contest });
+                this.setState({contest: contest, loading: false});
             }).catch((err) => {
                 console.log(err);
                 const statusCode = err.response.data.status;
+                this.setState({loading: false})
                 if(statusCode == 403) {
                     this.props.history.push({
                         pathname: "/contests",
@@ -87,26 +90,30 @@ class Contest extends Component {
 
     render() {
         return (
-            <div className="col-10 offset-1">
-                { this.state.contest != null ? 
-                (<div className="mt-4">
-                    <h2>{this.state.contest.contestName}</h2>
-                    <hr></hr>
-                    <br></br>
-                    <h3>Problems</h3>
-                    <br></br>
-                    <div className="row">
-                        <div className="col-8">
-                            {this.showProblems()}
+            <div>
+                { ! this.state.loading ?
+                (<div className="col-10 offset-1">
+                    { this.state.contest != null ? 
+                    (<div className="mt-4">
+                        <h2>{this.state.contest.contestName}</h2>
+                        <hr></hr>
+                        <br></br>
+                        <h3>Problems</h3>
+                        <br></br>
+                        <div className="row">
+                            <div className="col-8">
+                                {this.showProblems()}
+                            </div>
+                            <div className="ml-3 col-3">
+                                <h4>Current Rank: {this.state.currentRank}</h4>
+                                <br></br>
+                                <h5>Contest ends in: </h5>
+                                <CountDownTimer time={this.state.contest.endTime}/>
+                            </div>
                         </div>
-                        <div className="ml-3 col-3">
-                            <h4>Current Rank: {this.state.currentRank}</h4>
-                            <br></br>
-                            <h5>Contest ends in: </h5>
-                            <CountDownTimer time={this.state.contest.endTime}/>
-                        </div>
-                    </div>
-                </div>) : <NotFound/>}
+                    </div>) : <NotFound/>}
+                </div>) : <Loading />
+                }
             </div>
         );
     }
