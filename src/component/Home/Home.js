@@ -34,7 +34,7 @@ class Home extends Component {
         return upcomingContests.map((upcomingContest, index) => 
             <div key = {index}>
                 <p>
-                    <a className="link-primary">{upcomingContest.contestName}</a>
+                    <a className="link-primary" href={"/contests/" + upcomingContest.contestId}>{upcomingContest.contestName}</a>
                     {console.log(new Date(upcomingContest.startTime) - new Date())}
                 </p>
                 <CountDownTimer time={upcomingContest.startTime}/>
